@@ -12,10 +12,18 @@
 
     <h2>A Portfolio Research Paper on Rich Experience, 3D Neural Tissue, Reflection, and Adaptive Glia</h2>
 
+    <p>Project documentation for Brad Nelson</p>
+    <p>May 2026</p>
+
+    <hr>
+
+    <h2>Project Overview</h2>
+
     <p>
-        This project documents a code-based experimental architecture for a developmental,
-        biological-style learner. The goal is to explore what a learner could look like if it
-        were designed more like a growing biological tissue instead of a fixed flat neural network.
+        This paper documents a code-based experimental architecture for a developmental,
+        biological-style learner. The goal is to explain the engineering problem, the
+        experimental progression, what worked, what failed, and why the next research step is
+        adaptive glia patches inside a two-hemisphere 3D tissue model.
     </p>
 
     <h2>Executive Summary</h2>
@@ -27,64 +35,104 @@
     </p>
 
     <p>
-        The strongest version, v15, solved the tested toy tasks by combining task-specific
+        The best-performing version, v15, solved all three toy tasks by combining task-specific
         output heads, a reflection pass, normal-path replay, and an operation-style number-line
         workspace for addition.
     </p>
 
     <p>
-        Later 3D versions showed that spatial neural tissue can coexist with learning, but
-        static global growth and pruning rules are too brittle. The current conclusion is that
-        the base neuron and rich-experience learner are worth preserving, but the next bottleneck
-        is glia stability.
+        The later 3D versions showed that spatial neural tissue can coexist with learning, but
+        static global growth and pruning rules are too brittle. Pruning can be too fast, growth
+        can be too loose, and survival alone does not guarantee useful pathways.
     </p>
-
-    <h2>Core Ideas</h2>
-
-    <ul>
-        <li>Rich experience objects instead of flat binary input</li>
-        <li>Task-specific output heads</li>
-        <li>Reflection followed by normal-path replay</li>
-        <li>Operation-style workspace for arithmetic</li>
-        <li>3D neural tissue with local links and rare bridges</li>
-        <li>Slow forgetting and history-aware pruning</li>
-        <li>Future two-hemisphere structure</li>
-        <li>Adaptive glia patches for local tissue regulation</li>
-    </ul>
-
-    <h2>What Worked</h2>
 
     <p>
-        Rich experience objects gave the learner more useful context than flat binary input.
-        Task-specific heads reduced interference between different task types. Reflection helped,
-        but normal-path replay was needed so the network learned to improve its first-pass answer
-        instead of depending on teacher correction signals.
+        The current conclusion is that the base neuron and rich-experience learner are worth
+        preserving. The next bottleneck is glia stability: glia-like regulators should become
+        adaptive local agents that learn how to grow, prune, repair, stabilize, and protect
+        pathways without producing task answers directly.
     </p>
-
-    <h2>What Did Not Work</h2>
 
     <p>
-        One shared scalar output was too crude. Growth-only tissue development caused overgrowth.
-        Aggressive pruning destroyed too many spatial links. Stability alone did not guarantee
-        useful pathways. These failures pointed toward the need for adaptive glia-like regulators.
+        The next proposed direction is v21: two hemispheres, separate brain-like input regions,
+        guided developmental corridors, and a small number of adaptive glia patches that learn
+        local tissue regulation.
     </p>
 
-    <h2>Next Direction</h2>
+    <h2>1. Motivation</h2>
 
     <p>
-        The next proposed direction is a two-hemisphere model with separate input regions,
-        guided developmental corridors, and adaptive glia patches. These glia patches would not
-        produce task answers directly. Instead, they would monitor local tissue health and learn
-        when to grow, prune, repair, stabilize, protect, or reopen plasticity.
+        Most neural-network experiments start from a fixed graph of layers and weights. This
+        project started from a different question: what would a code-based learner look like if
+        it were designed as a developmental tissue rather than a static feedforward network?
     </p>
-
-    <h2>Status</h2>
 
     <p>
-        This is an early-stage research and portfolio project. It is not presented as finished
-        artificial general intelligence. It is an engineering exploration of adaptive learning
-        structures, biological-style regulation, and developmental neural organization.
+        The goal is not to recreate all of biology. The goal is to explore engineering ideas
+        inspired by biological learning: rich sensory context, reflection, memory, local tissue
+        development, growth, pruning, repair, and support cells that regulate how the network
+        changes over time.
     </p>
+
+    <p>
+        The project is intentionally not hardware-constrained. Earlier binary-neuron and
+        hardware-friendly ideas were useful stepping stones, but the current design direction
+        is a software model of biological-equivalent learning. This allows richer internal
+        state, analog error signals, dendrite-like branches, 3D tissue positions, slow
+        structural turnover, and eventually adaptive glia patches.
+    </p>
+
+    <h2>2. Core Architecture</h2>
+
+    <h3>2.1 Rich experience objects</h3>
+
+    <p>
+        The first major shift was replacing flat input vectors with BioExperience objects. A
+        sample is not only a few bits. It includes multiple typed signal channels that represent
+        different ways the learner can experience the same task.
+    </p>
+
+    <pre>
+BioExperience
+    raw signals: direct values and simple measurements
+    context signals: task identity and goal framing
+    relation signals: greater-than, equality, distance, parity
+    operation signals: count-up, number-line endpoint, step pressure
+    memory signals: similar past cases and their errors
+    attention signals: novelty, confidence, interest, frustration
+    teacher signals: expected value, error direction, correction hints
+    </pre>
+
+    <p>
+        This change made the learner less like a vector mapper and more like a small learning
+        organism. It also made it possible to test the idea that different kinds of information
+        should enter different tissue regions later.
+    </p>
+
+    <h3>2.2 Feedforward, reflection, and normal-path replay</h3>
+
+    <p>
+        The successful learning loop is not classic backpropagation. The learner first predicts
+        normally, then reflects using teacher/error context, then replays the same input without
+        teacher help before the final learning update. This normal-path replay was important
+        because reflection can otherwise teach the network to depend on correction signals
+        instead of improving the first-pass pathway.
+    </p>
+
+    <pre>
+1. Feedforward pass:
+       experience -> tissue -> task head -> predicted_norm
+
+2. Reflection pass:
+       experience + teacher/error context -> tissue -> reflected prediction
+
+3. Normal-path replay:
+       experience without teacher context -> tissue -> normal prediction
+
+4. Learning update:
+       analog error = expected_norm - normal_prediction
+       update task head, assemblies, branches, synapses, memory, curiosity, and tissue regulation
+    </pre>
 
 </body>
 </html>
