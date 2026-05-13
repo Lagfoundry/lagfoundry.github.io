@@ -133,6 +133,220 @@ BioExperience
        analog error = expected_norm - normal_prediction
        update task head, assemblies, branches, synapses, memory, curiosity, and tissue regulation
     </pre>
+    <h3>2.3 Dendrite-like branches and synapse state</h3>
 
+    <p>
+        Each neuron has branches that listen to different types of signal. A raw value and a
+        teacher correction should not be treated as the same kind of input. Branches allow the
+        same neuron to respond differently to raw sensory input, context, relation signals,
+        operation signals, memory, teacher feedback, and attention state.
+    </p>
+
+    <p>
+        Synapses carry more than a weight. They track eligibility, usefulness, stability,
+        fatigue, context usefulness, and later spatial-history properties.
+    </p>
+
+    <h3>2.4 3D tissue instead of flat layers</h3>
+
+    <p>
+        The project then moved from flat assemblies to a 3D tissue model. Neurons receive
+        coordinates, local neighbors are cheaper to connect, long-range bridges are rarer and
+        more expensive, and regions occupy different areas of simulated space.
+    </p>
+
+    <p>
+        This is not only a visualization. It changes the growth rule: connection probability
+        and cost depend on distance and region relationship.
+    </p>
+
+    <pre>
+Flat layer idea:
+    input -> hidden -> output
+
+3D tissue idea:
+    cells have positions
+    local neighborhoods form first
+    rare bridges connect distant regions
+    useful pathways stabilize over time
+    glia learns how tissue should reshape
+    </pre>
+
+    <h2>3. Experimental Version History</h2>
+
+    <table border="1" cellpadding="6" cellspacing="0">
+        <tr>
+            <th>Version</th>
+            <th>Main change</th>
+            <th>What worked</th>
+            <th>What failed</th>
+            <th>Lesson</th>
+        </tr>
+
+        <tr>
+            <td>v14</td>
+            <td>First rich biological rewrite</td>
+            <td>
+                Established rich experience, typed channels, branches, memory, attention,
+                reflection, and glia-like growth/pruning.
+            </td>
+            <td>
+                One shared scalar output and imbalanced binary tasks caused fake relation
+                learning.
+            </td>
+            <td>
+                The scaffold could run, but readout and teaching balance mattered.
+            </td>
+        </tr>
+
+        <tr>
+            <td>v14C</td>
+            <td>Task-specific heads and balanced binary teaching</td>
+            <td>
+                Equality and greater-than reached real 1.000 accuracy.
+            </td>
+            <td>
+                Addition remained weak.
+            </td>
+            <td>
+                Relation tasks needed task heads and balanced teaching; arithmetic needed a
+                different representation.
+            </td>
+        </tr>
+
+        <tr>
+            <td>v15</td>
+            <td>Normal-path replay plus operation-style arithmetic workspace</td>
+            <td>
+                Reached 1.000 accuracy on add, equality, and greater-than.
+            </td>
+            <td>
+                Used a strong teacher-provided operation view, so it showed scaffolded
+                operation learning more than self-generated arithmetic.
+            </td>
+            <td>
+                The system improved when experience became more like a thought process.
+            </td>
+        </tr>
+
+        <tr>
+            <td>v16</td>
+            <td>3D tissue with coordinates, local links, bridges, distance cost</td>
+            <td>
+                Reached 1.000 on all tasks and proved 3D tissue did not break learning.
+            </td>
+            <td>
+                Spatial links were pruned very aggressively; only 8 survived by step 12000.
+            </td>
+            <td>
+                3D tissue can coexist with learning, but pruning timing was too harsh.
+            </td>
+        </tr>
+
+        <tr>
+            <td>v17</td>
+            <td>Longer development and protected spatial links</td>
+            <td>
+                3D tissue stayed alive and grew to 1603 spatial links.
+            </td>
+            <td>
+                Addition stayed weak; bridge links overgrew to 941 live bridges.
+            </td>
+            <td>
+                Grow-only infancy was unrealistic; tissue needs turnover, not just protection.
+            </td>
+        </tr>
+
+        <tr>
+            <td>v18</td>
+            <td>Biological turnover and bridge caps</td>
+            <td>
+                Bridge ratio stayed controlled and relation tasks stayed perfect.
+            </td>
+            <td>
+                Addition failed; pruning and signal cleanup disrupted useful arithmetic paths.
+            </td>
+            <td>
+                Turnover helped structure but did not guide useful corridors.
+            </td>
+        </tr>
+
+        <tr>
+            <td>v19</td>
+            <td>Probabilistic growth and pruning</td>
+            <td>
+                Confirmed chance-based structural change is the right type of mechanism.
+            </td>
+            <td>
+                Prune chance was too high; 2020 spatial links were pruned by step 12000.
+            </td>
+            <td>
+                Probabilistic pruning must be slow and history-aware.
+            </td>
+        </tr>
+
+        <tr>
+            <td>v20</td>
+            <td>Slow staged forgetting and history-protected pruning</td>
+            <td>
+                Spatial tissue survived: 862 live spatial links and 0 spatial prunes by step
+                12000.
+            </td>
+            <td>
+                Addition still failed; surviving paths were mostly same-region clusters, not
+                useful arithmetic corridors.
+            </td>
+            <td>
+                Stability alone is not enough; glia must learn local guidance and corridor
+                protection.
+            </td>
+        </tr>
+    </table>
+
+    <h2>4. Key Results and Interpretation</h2>
+
+    <h3>4.1 v15: the strongest learning result</h3>
+
+    <p>
+        v15 was the first version that clearly solved the toy world. Its source notes describe
+        four critical fixes: normal-path training after reflection, an operation-style arithmetic
+        view, a clipped linear output for addition, and teacher feedback with operation-specific
+        correction signals.
+    </p>
+
+    <p>
+        The final run reached add_accuracy=1.000, equality_accuracy=1.000, and
+        greater_than_accuracy=1.000.
+    </p>
+
+    <p>
+        The engineering lesson is that addition did not behave like a simple
+        relation-classification task. It needed an internal operation view, such as a number line
+        or count-up workspace. That result supports a broader principle: a biological-style
+        learner may need internal tools, not just input features.
+    </p>
+
+    <h3>4.2 v16-v20: 3D tissue worked, but fixed glia rules did not</h3>
+
+    <p>
+        v16 proved that a 3D tissue model did not automatically destabilize the learner.
+        However, it pruned spatial links down to only 8 by step 12000. v17 corrected this by
+        protecting spatial links longer, but spatial links overgrew to 1603 and addition stayed
+        weak.
+    </p>
+
+    <p>
+        v18 controlled bridges but still failed addition. v19 made structural change
+        probabilistic but pruned too aggressively. v20 slowed forgetting and preserved 862
+        spatial links, but addition still failed because the surviving paths were not the right
+        arithmetic corridors.
+    </p>
+
+    <p>
+        These results suggest that the problem is not simply whether the system has enough
+        tissue. The problem is whether tissue is guided into useful routes. A 3D learner needs
+        local growth, slow forgetting, and corridor formation. Survival alone is not intelligence;
+        stable useful pathways are the goal.
+    </p>
 </body>
 </html>
