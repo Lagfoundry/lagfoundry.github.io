@@ -348,5 +348,434 @@ Flat layer idea:
         local growth, slow forgetting, and corridor formation. Survival alone is not intelligence;
         stable useful pathways are the goal.
     </p>
+    <h2>5. What Worked</h2>
+
+    <h3>5.1 Rich experience beat flat input</h3>
+
+    <p>
+        Moving away from flat binary input was one of the most important improvements. The
+        learner became more expressive when each example included raw, context, relation,
+        operation, memory, attention, and teacher channels.
+    </p>
+
+    <h3>5.2 Task-specific heads reduced interference</h3>
+
+    <p>
+        A shared scalar output allowed relation tasks to fall into majority-class shortcuts.
+        Task-specific heads allowed addition, equality, and greater-than to build separate
+        readouts.
+    </p>
+
+    <h3>5.3 Reflection needed normal-path replay</h3>
+
+    <p>
+        Reflection can improve an answer but accidentally train the corrected route. Normal-path
+        replay forces the first-pass pathway to learn after reflection.
+    </p>
+
+    <h3>5.4 Operation-style workspace made addition learnable</h3>
+
+    <p>
+        Addition recovered only when the system received a number-line or count-up style
+        operation view. This points toward future internal action systems.
+    </p>
+
+    <h3>5.5 3D tissue was viable</h3>
+
+    <p>
+        Adding coordinates, local links, rare bridges, and distance costs did not by itself
+        break learning. This supports 3D tissue as the base architecture.
+    </p>
+
+    <h3>5.6 Slow forgetting was more realistic than instant pruning</h3>
+
+    <p>
+        v20 showed that history-protected forgetting preserved tissue much better than
+        aggressive pruning. This matches the idea that connections should weaken first, then be
+        deleted only after repeated evidence of nonuse or harm.
+    </p>
+
+    <h2>6. What Did Not Work</h2>
+
+    <h3>6.1 One shared output was too crude</h3>
+
+    <p>
+        The first rich biological rewrite had enough moving parts to run, but the single shared
+        scalar output created shortcuts and task interference.
+    </p>
+
+    <h3>6.2 Growth-only infancy caused overgrowth</h3>
+
+    <p>
+        Protecting spatial links too long created a dense tissue that stayed alive but did not
+        form the right arithmetic route. Biological development needs formation and elimination
+        at the same time.
+    </p>
+
+    <h3>6.3 Probabilistic pruning was too fast at first</h3>
+
+    <p>
+        v19 used probabilistic pruning, which was the right type of mechanism, but it applied
+        too often and too strongly. A chance-based guillotine is still a guillotine.
+    </p>
+
+    <h3>6.4 Stability alone did not create useful corridors</h3>
+
+    <p>
+        v20 preserved tissue, but many surviving links were same-region clusters rather than
+        arithmetic routes such as raw_sense to operation or operation to integrator.
+    </p>
+
+    <h3>6.5 Fixed global glia rules are too brittle</h3>
+
+    <p>
+        The same pruning or growth schedule cannot serve every region. Relation tasks may need
+        stability while addition needs plasticity and repair. This points directly toward
+        adaptive glia patches.
+    </p>
+
+    <h2>7. Why Adaptive Glia Became the Next Bottleneck</h2>
+
+    <p>
+        The experimental sequence points to one central conclusion: the neuron/tissue side can
+        learn, but fixed support rules cannot reliably manage tissue development. The system
+        needs glia-like regulators that learn the network itself.
+    </p>
+
+    <p>
+        These regulators should not produce task answers. Instead, they should monitor local
+        tissue health, remember what structural changes helped or hurt, and adjust growth,
+        pruning, repair, stability, excitability, bridge permission, and plasticity.
+    </p>
+
+    <pre>
+Neurons learn content:
+    What does this signal mean?
+    What should the answer be?
+    Which operation helps this task?
+
+Glia learn the tissue:
+    Is this region overgrowing?
+    Is this region underperforming?
+    Did growth help?
+    Did pruning hurt?
+    Should plasticity reopen here?
+    Should this pathway be stabilized?
+    </pre>
+
+    <p>
+        This framing turns glia into meta-learning nodes. They are not part of the output answer,
+        but they shape the system that produces future answers.
+    </p> 
+    <h2>8. Related Research and Design Inspiration</h2>
+
+    <p>
+        This project should not claim that no one has used glia in AI. Related work already
+        exists in artificial glial cells, astrocyte-modulated networks, structural plasticity,
+        synaptic pruning, and neuromorphic growth. The distinctive direction here is the
+        combination: rich experience objects, reflection, 3D tissue, slow forgetting, future
+        hemispheres, and adaptive glia patches that learn local tissue regulation.
+    </p>
+
+    <table border="1" cellpadding="6" cellspacing="0">
+        <tr>
+            <th>Research area</th>
+            <th>What the literature suggests</th>
+            <th>Design takeaway</th>
+        </tr>
+
+        <tr>
+            <td>Artificial glial cells in ANNs</td>
+            <td>
+                A 2023 systematic review reported that artificial astrocyte-style additions have
+                been used in several ANN approaches and can improve tasks such as classification
+                and regression.
+            </td>
+            <td>
+                Use glia as modulators around neurons, not task-output units.
+            </td>
+        </tr>
+
+        <tr>
+            <td>Astrocyte-gated plasticity</td>
+            <td>
+                Recent astrocyte-gated plasticity work uses slow astrocyte-like variables to
+                modulate learning over time.
+            </td>
+            <td>
+                Let glia gate plasticity: stable regions become less plastic, failing regions
+                reopen learning.
+            </td>
+        </tr>
+
+        <tr>
+            <td>Structural plasticity</td>
+            <td>
+                Neuromorphic structural-plasticity work shows dendritic growth can define useful
+                sparse topologies based on activity.
+            </td>
+            <td>
+                Prefer sparse useful topology over dense random wiring; use coactivity and
+                distance.
+            </td>
+        </tr>
+
+        <tr>
+            <td>Microglia and pruning</td>
+            <td>
+                Microglia research supports pruning as an activity-dependent regulatory process,
+                not merely instant deletion.
+            </td>
+            <td>
+                Use staged weakening, deletion marks, reuse protection, and slow forgetting.
+            </td>
+        </tr>
+
+        <tr>
+            <td>Multisensory brain organization</td>
+            <td>
+                Biological sensory systems process different modalities through specialized
+                pathways before later integration.
+            </td>
+            <td>
+                Future versions should route different input types to dedicated regions before
+                integration.
+            </td>
+        </tr>
+    </table>
+
+    <h2>9. Proposed v21 Direction</h2>
+
+    <p>
+        The next step should not be a larger flat network. It should be a more organized
+        biological structure. The highest-priority upgrade is to combine two hemispheres with
+        adaptive glia patches and guided developmental corridors.
+    </p>
+
+    <h3>9.1 Separate hemispheres</h3>
+
+    <p>
+        More neurons should not simply be packed into the same 3D space. A separate hemisphere
+        gives the system more capacity without crowding one tissue volume. One hemisphere can
+        emphasize structured task and operation routes, while the other can emphasize memory,
+        alternate views, reflection, and exploration. Cross-hemisphere bridges should be rare,
+        expensive, and protected only if useful.
+    </p>
+
+    <pre>
+Left hemisphere:
+    structured task route
+    raw -> relation -> operation -> integrator
+
+Right hemisphere:
+    associative route
+    memory -> alternate views -> reflection -> integrator
+
+Cross-hemisphere links:
+    rare, expensive, protected if useful
+    </pre>
+
+    <h3>9.2 Multi-entry sensory routing</h3>
+
+    <p>
+        A living organism does not experience the world through one input stream. It receives
+        visual, auditory, touch/body, taste/smell, internal state, teacher/social, and memory
+        signals through partly specialized systems. A software version should mirror this by
+        routing different signal types into different 3D regions before integration.
+    </p>
+
+    <pre>
+raw values or symbols        -> raw_pattern region
+ordered/counting information -> sequence or operation region
+comparisons and distance     -> relation region
+confidence/fatigue/error     -> body_state region
+similar past examples        -> memory region
+teacher correction           -> teacher_error region
+final synthesis              -> integrator region
+    </pre>
+
+    <h3>9.3 Adaptive glia patches</h3>
+
+    <p>
+        Instead of one global GliaController, v21 should test a small number of local glia
+        patches. A patch monitors a neighborhood and slowly adjusts its own regulatory biases.
+        The first test should be deliberately small: perhaps one operation-region patch and one
+        relation-region patch. This reduces code complexity while testing whether adaptive glia
+        can stabilize one solved region and repair one struggling region.
+    </p>
+
+    <pre>
+GliaPatch
+    location: hemisphere, region, center, radius
+    learned biases:
+        growth_bias
+        prune_bias
+        repair_bias
+        stability_bias
+        bridge_bias
+        plasticity_bias
+        excitability_bias
+    local memory:
+        recent_error
+        recent_improvement
+        recent_regression
+        growth_helped_score
+        prune_hurt_score
+        overgrowth_score
+        underuse_score
+    </pre>
+
+    <h3>9.4 Guided developmental corridors</h3>
+
+    <p>
+        Growth should not be fully random. Biology uses local neighborhoods, developmental
+        gradients, and preferred projections. The code version can start with soft corridor
+        biases, not hard-coded answers. For the current toy tasks, useful corridors likely
+        include raw_sense to relation, relation to integrator, raw_sense to operation, relation
+        to operation, operation to integrator, teacher to operation, and memory to operation.
+    </p>
+
+    <h2>10. Engineering Significance</h2>
+
+    <p>
+        The project demonstrates an iterative engineering process around an unconventional
+        learning architecture. The important skill is not only that one version reached perfect
+        scores on toy tasks. The important skill is identifying why it worked, why later versions
+        failed, and what those failures imply about the architecture.
+    </p>
+
+    <p>
+        The sequence from v14 through v20 shows controlled experimentation: readout isolation,
+        balanced training, reflection fixes, operation representation, spatial tissue,
+        developmental schedule tuning, probabilistic pruning, and staged forgetting.
+    </p>
+
+    <p>
+        For a team evaluating this work, the value is in the design reasoning: the project turns
+        biological hypotheses into runnable code, logs behavior, diagnoses failure modes, and
+        converts results into a next architecture plan. It is an engineering exploration of
+        adaptive systems rather than a claim of finished AGI.
+    </p>
+
+    <h2>11. Limitations</h2>
+
+    <p>
+        The tested task world is small: addition, equality, and greater-than over values 0
+        through 5.
+    </p>
+
+    <p>
+        Perfect task scores in v15 and v16 do not prove general intelligence.
+    </p>
+
+    <p>
+        The operation channel in v15 included strong teacher-provided arithmetic views. Future
+        work should move toward self-generated internal operations.
+    </p>
+
+    <p>
+        The current glia system is mostly formula-based. Adaptive glia patches are a proposed
+        next step, not yet proven.
+    </p>
+
+    <p>
+        More random seeds, larger task sets, and ablation tests are needed before treating any
+        result as robust.
+    </p>
+
+    <p>
+        The project is inspired by biology but remains an engineering abstraction, not a
+        detailed neuroscience simulation.
+    </p>
+
+    <h2>12. Conclusion</h2>
+
+    <p>
+        The v14-v20 project arc supports a cautious but meaningful conclusion: a code-based
+        biological learner can learn while using rich experience, reflection, memory,
+        task-specific pathways, and evolving spatial structure.
+    </p>
+
+    <p>
+        v15 showed that normal-path replay and operation-style thought tools can solve the
+        tested toy tasks. v16 showed that 3D tissue can coexist with learning. v17-v20 showed
+        that growth and pruning require more than fixed global rules.
+    </p>
+
+    <p>
+        The next bottleneck is glia stability: local regulators that learn the network itself.
+        The next architecture should therefore use two hemispheres, multiple input-entry
+        regions, guided developmental corridors, and adaptive glia patches that learn when to
+        grow, prune, repair, stabilize, and reopen plasticity.
+    </p>
+
+    <h2>References</h2>
+
+    <p>
+        [P1] Project source and notes: Adaptive Biological Learner v15. Main fixes:
+        normal-path training after reflection, operation-style arithmetic view, clipped linear
+        add head, task-specific heads, rich experience objects.
+    </p>
+
+    <p>
+        [P2] Project run logs v15-v20. Key observations: v15 solved all tasks; v16 solved tasks
+        but pruned spatial tissue; v17 overgrew; v18 controlled bridges but failed add; v19
+        pruned too aggressively; v20 preserved tissue but failed add because useful corridors
+        did not emerge strongly.
+    </p>
+
+    <p>
+        [R1] S. Alvarez-Gonzalez, F. A. Cedron-Santaeufemia, A. Pazos, A. B. Porto-Pazos.
+        Artificial glial cells in artificial neuronal networks: a systematic review.
+        Artificial Intelligence Review, 2023.
+        https://link.springer.com/article/10.1007/s10462-023-10586-1
+    </p>
+
+    <p>
+        [R2] Z. Dong et al. Astrocyte-gated multi-timescale plasticity for online continual
+        learning in deep spiking neural networks. Frontiers in Neuroscience, 2025/2026.
+        https://www.frontiersin.org/journals/neuroscience/articles/10.3389/fnins.2025.1768235/full
+    </p>
+
+    <p>
+        [R3] K. Janzakova et al. Structural plasticity for neuromorphic networks with
+        electropolymerized dendritic PEDOT connections. Nature Communications, 2023.
+        https://www.nature.com/articles/s41467-023-43887-8
+    </p>
+
+    <p>
+        [R4] M. Andoh and R. Koyama. Microglia regulate synaptic development and plasticity.
+        Developmental Neurobiology / review available via PMC, 2021.
+        https://pmc.ncbi.nlm.nih.gov/articles/PMC8451802/
+    </p>
+
+    <p>
+        [R5] J. Cornell et al. Microglia regulation of synaptic plasticity and learning and
+        memory. Neural Regeneration Research, 2022.
+        https://pmc.ncbi.nlm.nih.gov/articles/PMC8530121/
+    </p>
+
+    <p>
+        [R6] Y. Ota et al. The role of astrocytes in the regulation of synaptic plasticity and
+        memory formation. Neural Plasticity, 2013.
+        https://pmc.ncbi.nlm.nih.gov/articles/PMC3867861/
+    </p>
+
+    <p>
+        [R7] T. Faust et al. Mechanisms governing activity-dependent synaptic pruning in the
+        developing mammalian CNS. Nature Reviews Neuroscience / review available via PMC, 2021.
+        https://pmc.ncbi.nlm.nih.gov/articles/PMC8541743/
+    </p>
+
+    <p>
+        [R8] M. Gadhvi and A. Waseem. Physiology, Sensory System. StatPearls / NCBI Bookshelf,
+        2023. https://www.ncbi.nlm.nih.gov/books/NBK547656/
+    </p>
+
+    <p>
+        [R9] B. E. Stein et al. Development of multisensory integration from the perspective of
+        the individual neuron. Nature Reviews Neuroscience / PMC, 2014.
+        https://pmc.ncbi.nlm.nih.gov/articles/PMC4215474/
+    </p>    
 </body>
 </html>
