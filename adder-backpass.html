@@ -97,6 +97,41 @@
         backpass, heterogeneous synaptic plasticity, saturating counters, hardware-native AI,
         residual connection, BNN, popcount, counter-based learning
     </p>
+        <h2>Personal Motivation</h2>
+
+    <p>
+        The reason this project focuses so heavily on hardware-friendly learning is not only
+        because it is technically interesting. I wanted to build a neural network that could
+        eventually be wired by hand from scratch in the kinds of simulators I use, and possibly
+        even tested with real electronics on a breadboard. Circuitry is one of my main passions,
+        so I kept asking a simple question: how much of a learning system can be reduced down to
+        gates, adders, counters, registers, and threshold logic?
+    </p>
+
+    <p>
+        That goal shaped almost every design choice. I was not trying to make a normal software
+        neural network and then force it into hardware later. I wanted the learning rules
+        themselves to feel like something that could be built from simple digital circuits. That
+        is why the project went through multiple iterations using XNOR matching, popcounts,
+        binary adders, XOR error, saturating counters, and local increment/decrement rules.
+    </p>
+
+    <p>
+        As the project developed, I started to realize the larger implication. Most useful AI
+        systems require heavy hardware resources to run or train. A network like this points in a
+        different direction: a learning system that could potentially run on very minimal digital
+        hardware, almost "skin and bones" compared to a normal computer. It would not need to
+        start from a full CPU, GPU, floating-point unit, or traditional neural-network accelerator.
+        It could be built from the simpler logic blocks underneath those systems.
+    </p>
+
+    <p>
+        That possibility is what motivates me to keep improving the design. At first, the project
+        came from my own interest in hand-wired circuits and digital logic. Over time, it became
+        more than that. If this kind of architecture can be made more capable, it could become one
+        small contribution toward AI systems that are cheaper, simpler, more hardware-native, and
+        easier to build from the ground up.
+    </p>
 
     <h2>1. Introduction</h2>
 
