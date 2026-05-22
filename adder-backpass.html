@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Hardware-Friendly Multiplication-Free BNN</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 950px;
+            margin: 40px auto;
+            padding: 0 20px;
+            line-height: 1.6;
+            background: #f7f7f7;
+            color: #222;
+        }
+
+        h1, h2, h3 {
+            color: #111;
+        }
+
+        h1 {
+            border-bottom: 2px solid #222;
+            padding-bottom: 10px;
+        }
+
+        a {
+            color: #0645ad;
+        }
+
+        pre {
+            background: #eeeeee;
+            padding: 15px;
+            overflow-x: auto;
+            border-left: 4px solid #444;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            background: white;
+            margin: 20px 0;
+        }
+
+        th, td {
+            border: 1px solid #999;
+            padding: 8px;
+            vertical-align: top;
+        }
+
+        th {
+            background: #e6e6e6;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #aaa;
+        }
+    </style>
+</head>
+<body>
+
+    <p><a href="index.html">Back to Project Menu</a></p>
+
+    <h1>A Hardware-Friendly Multiplication-Free BNN With Adder-Based Backpass and Heterogeneous Synaptic Plasticity</h1>
+
+    <p>Michael Nelson</p>
+    <p>Updated portfolio research write-up</p>
+
+    <hr>
+
+    <h2>Abstract</h2>
+
+    <p>
+        This paper documents an updated hardware-oriented binary neural network, or BNN, design
+        that keeps the full learning loop close to simple digital logic. The current baseline uses
+        an 8 -> 16 -> 16 -> 16 -> 8 block with XNOR-popcount similarity, a centered additive
+        residual connection, XOR output error, adder-based hidden backpass, alternating backpass
+        carry direction, and grouped whole-neuron mixed-depth counters.
+    </p>
+
+    <p>
+        The strongest new result is the use of heterogeneous synaptic plasticity through 2-bit,
+        3-bit, and 4-bit counter nodes. Effective weights remain binary, but different nodes
+        change at different speeds. In repeated runs, this mixed-node baseline reached final
+        error 0 on a 6-pattern identity dataset, including one run that converged by epoch 97.
+    </p>
+
+    <p>
+        The main contribution is not that this replaces gradient descent. The contribution is a
+        practical hardware-native learning architecture that removes multiplication from the
+        tested forward and update path while using adders, counters, popcounts, and local binary
+        rules to produce repeatable learning behavior.
+    </p>
+
+    <p>
+        Keywords: binary neural network, multiplication-free learning, XNOR-popcount, adder
+        backpass, heterogeneous synaptic plasticity, saturating counters, hardware-native AI,
+        residual connection, BNN, popcount, counter-based learning
+    </p>
+
+    <h2>1. Introduction</h2>
+
+    <p>
+        Most neural network systems are normally built around multiply-accumulate operations,
+        floating-point gradients, and optimizer state. Those tools are powerful, but they do not
+        map cleanly onto a small hardware learning system made from gates, adders, counters,
+        registers, and threshold logic.
+    </p>
+
+    <p>
+        This project started from a different direction. The goal was to see whether a useful
+        binary neural network could learn with hardware-friendly operations only: XNOR, XOR,
+        popcount, binary addition, threshold checks, and counter increments or decrements.
+    </p>
+
+    <p>
+        The target was not a software-style neural network pretending to be hardware. The target
+        was a design that could eventually be translated into gate-level logic, HDL, or
+        FPGA-style hardware without relying on floating-point multiplication.
+    </p>
+
+    <p>
+        Earlier versions showed that an adder-based hidden backpass could help hidden layers
+        receive more useful training signals than a copied shared error bus. The newer version
+        improves that system with a wider block, additive residuals, alternating backpass carry
+        direction, and mixed-depth counter nodes. That final change became the largest stability
+        improvement: the network performed better when some nodes could learn quickly and others
+        changed more slowly.
+    </p>
+
+    <h2>2. Current Baseline Summary</h2>
+
+    <p>
+        The current baseline is a one-block BNN shaped 8 -> 16 -> 16 -> 16 -> 8. It has an 8-bit
+        input, three 16-wide internal stages, and an 8-bit output. The block is still small, but
+        it is wider than the original 8-wide versions that struggled with stability.
+    </p>
+
+    <p>
+        The current block uses a centered additive residual at layer index 1. The original 8-bit
+        input is projected into the center of a 16-bit bus as 0000 + input8 + 0000, then added
+        to the 16-bit layer output. This keeps the residual path arithmetic instead of OR-based,
+        while also allowing the residual to cross a width change.
+    </p>
+
+    <p>
+        The hidden backpass uses binary adders. The output layer starts with XOR error between
+        the expected output and the actual output. Moving backward through hidden layers, the
+        current target/error bus is added to the layer output bus, and the low bits become the
+        next hidden target/error bus. Carry is passed backward as a small context signal.
+    </p>
+
+    <p>
+        The newest version also alternates which side of the bus acts as the LSB so carry
+        pressure does not always move through each hidden layer in the same direction.
+    </p>
+
+    <p>
+        The updated baseline uses grouped heterogeneous synaptic plasticity. About 2/3 of nodes
+        use 2-bit counters, about 2/9 use 3-bit counters, and about 1/9 use 4-bit counters. Each
+        whole node has one counter depth for all of its weights. The effective weight still stays
+        binary. The counter only controls how much update pressure is needed before the binary
+        weight changes.
+    </p>
+
+    <table>
+        <tr>
+            <th>Feature</th>
+            <th>Current baseline</th>
+        </tr>
+        <tr>
+            <td>Shape</td>
+            <td>8 -> 16 -> 16 -> 16 -> 8</td>
+        </tr>
+        <tr>
+            <td>Forward similarity</td>
+            <td>XNOR + popcount Hamming similarity</td>
+        </tr>
+        <tr>
+            <td>Forward residual</td>
+            <td>Centered additive residual at layer index 1</td>
+        </tr>
+        <tr>
+            <td>Output error</td>
+            <td>expected XOR output</td>
+        </tr>
+        <tr>
+            <td>Hidden backpass</td>
+            <td>target_bus + layer_output + carry</td>
+        </tr>
+        <tr>
+            <td>Backpass direction</td>
+            <td>Alternating neuron 0 as LSB/MSB by hidden layer</td>
+        </tr>
+        <tr>
+            <td>Weight memory</td>
+            <td>Grouped 2-bit, 3-bit, and 4-bit whole-node counters</td>
+        </tr>
+        <tr>
+            <td>Effective weights</td>
+            <td>Binary only</td>
+        </tr>
+    </table>
+
+    <h2>3. Hardware-Oriented Design Constraints</h2>
+
+    <p>
+        The network was designed around eventual hardware implementation. The preferred
+        operations are simple and local:
+    </p>
+
+    <ul>
+        <li>XNOR for binary similarity</li>
+        <li>XOR for output error</li>
+        <li>popcount trees for match counting</li>
+        <li>binary adders for residuals and hidden backpass</li>
+        <li>small saturating counters for weight memory</li>
+        <li>threshold checks for activation</li>
+        <li>local increment and decrement logic for updates</li>
+        <li>small counters or decoders for update timing</li>
+    </ul>
+
+    <p>
+        This makes the design multiplication-free in the tested learning loop. The forward path
+        does not use multiply-accumulate operations. The hidden backpass does not multiply an
+        error by weights. The update path does not apply gradient products. Instead, the system
+        uses binary matching, binary arithmetic, and saturating counter updates.
+    </p>
+
+    <p>
+        That does not mean this design is automatically better than conventional neural networks.
+        It means the architecture is aimed at a different problem: learning with logic that could
+        be built directly from simple hardware blocks.
+    </p>
+
+    <h2>4. Forward Pass: Binary Similarity Instead of Multiplication</h2>
+
+    <p>
+        Each neuron compares an input bus to its effective binary weight bus using XNOR. If an
+        input bit and effective weight bit match, the XNOR produces 1. If they differ, it produces
+        0. A popcount then counts how many bits matched.
+    </p>
+
+    <p>
+        The neuron score is based on the number of matches and a threshold. In the current code,
+        the score is computed as matches - (input_width + THRESHOLD - BIAS). The output is 1
+        when the score is at least 0 and 0 otherwise.
+    </p>
+
+    <p>
+        This is a binary similarity measure. It is closely related to Hamming distance:
+    </p>
+
+    <pre>
+hamming_distance = popcount(XOR(input_bits, weight_bits))
+hamming_similarity = popcount(XNOR(input_bits, weight_bits))
+hamming_similarity = width - hamming_distance
+    </pre>
+
+    <p>
+        This makes the forward path conceptually similar to multiplication-free research such as
+        AdderNet. AdderNet replaces multiplication-heavy convolution with an L1-distance response
+        between filters and input features. This project uses the binary special case:
+        XNOR-popcount measures Hamming similarity between a binary input pattern and a binary
+        effective weight pattern. The exact training system is different, but the motivation
+        overlaps: replace multiplication-heavy similarity with cheaper hardware-native
+        operations.
+    </p>
+
+    <h2>5. Weight Counters and Binary Effective Weights</h2>
+
+    <p>
+        The weights are stored as counters, but the neuron only sees a binary effective weight.
+        This is important. A 3-bit or 4-bit counter does not make the forward path multi-valued.
+        It only makes the effective binary bit harder or easier to flip during training.
+    </p>
+
+    <p>
+        For a 2-bit counter, values 0 and 1 produce effective weight 0, while 2 and 3 produce
+        effective weight 1. For a 3-bit counter, values 0 through 3 produce 0, while 4 through 7
+        produce 1. For a 4-bit counter, values 0 through 7 produce 0, while 8 through 15 produce
+        1.
+    </p>
+
+    <p>
+        The counter acts like a small memory behind the weight. A pure 1-bit weight can flip
+        after one update. A counter-based weight needs repeated pressure before it crosses the
+        threshold. That gives the network a hardware-friendly form of update smoothing without
+        adding multiplication, division, or floating-point optimizer state.
+    </p>
+
+    <h2>6. Heterogeneous Synaptic Plasticity</h2>
+
+    <p>
+        The strongest new improvement was assigning different counter depths to different whole
+        nodes. This is best described as grouped heterogeneous synaptic plasticity. The word
+        heterogeneous matters because not every node has the same learning speed. The word
+        grouped matters because the counter depth is assigned by whole neuron or node, not
+        randomly per individual weight.
+    </p>
+
+    <p>The current ratio is:</p>
+
+    <ul>
+        <li>about 2/3 of nodes use 2-bit counters</li>
+        <li>about 2/9 of nodes use 3-bit counters</li>
+        <li>about 1/9 of nodes use 4-bit counters</li>
+    </ul>
+
+    <p>
+        This creates fast, medium, and slow plasticity groups. The 2-bit nodes can move quickly
+        and explore. The 3-bit nodes change more slowly and stabilize intermediate patterns. The
+        4-bit nodes act as slow anchors that resist being overwritten unless the training signal
+        keeps pushing them.
+    </p>
+
+    <p>
+        A key lesson from testing was that random or overly simple mixing was not as useful as
+        whole-node grouping. The network behaved better when each node had a consistent
+        plasticity personality. In other words, one neuron should be a fast node, a medium node,
+        or a slow node. Its individual weights should not be randomly split across different
+        counter depths.
+    </p>
+
+    <table>
+        <tr>
+            <th>Node type</th>
+            <th>Counter range</th>
+            <th>Effective weight threshold</th>
+            <th>Role</th>
+        </tr>
+        <tr>
+            <td>2-bit node</td>
+            <td>0..3</td>
+            <td>counter >= 2</td>
+            <td>fast plasticity / exploration</td>
+        </tr>
+        <tr>
+            <td>3-bit node</td>
+            <td>0..7</td>
+            <td>counter >= 4</td>
+            <td>medium stabilization</td>
+        </tr>
+        <tr>
+            <td>4-bit node</td>
+            <td>0..15</td>
+            <td>counter >= 8</td>
+            <td>slow anchor / memory pressure</td>
+        </tr>
+    </table>
+
+    <h2>7. Adder-Based Hidden Backpass</h2>
+
+    <p>The output layer uses a simple binary error:</p>
+
+    <pre>
+output_error = expected_output XOR actual_output
+    </pre>
+
+    <p>
+        The hidden layers do not receive a copied version of that same error. Instead, moving
+        backward through the network, each hidden layer creates a new target/error bus using a
+        binary adder:
+    </p>
+
+    <pre>
+next_error_bus = low_bits(target_bus + layer_output + carry_in)
+    </pre>
+
+    <p>
+        carry_out is then passed backward into the next hidden-layer transform.
+    </p>
+
+    <p>
+        This was one of the earliest important discoveries in the project. A plain shared error
+        bus gave hidden neurons too little context. The adder backpass changed the error at each
+        layer by mixing it with that layer's output. The carry chain also allowed bit positions to
+        influence neighboring positions. In this design, carry is not just overflow to throw away.
+        It can act as a compact context signal threaded through hidden backpass transforms.
+    </p>
+
+    <p>
+        This should not be described as normal gradient descent. It is better described as a
+        hardware-friendly contextual error transform. It gives local update rules a changing
+        layer-specific target signal without requiring floating-point derivatives or matrix
+        gradient multiplication.
+    </p>
+
+    <h2>8. Alternating Backpass Carry Direction</h2>
+
+    <p>
+        A normal binary adder has direction. One side of the bus acts as the LSB side, and carry
+        pressure moves toward the MSB side. If every hidden backpass adder treats neuron 0 the
+        same way, the backpass can create one-sided carry bias across the whole network.
+    </p>
+
+    <p>The updated baseline alternates the backpass orientation by hidden layer. In the current 4-layer block:</p>
+
+    <ul>
+        <li>layer 3 is the output layer and uses XOR error only</li>
+        <li>layer 2 treats neuron 0 as the LSB side of the hidden backpass adder</li>
+        <li>layer 1 treats neuron 0 as the MSB side</li>
+        <li>layer 0 treats neuron 0 as the LSB side again</li>
+    </ul>
+
+    <p>
+        The forward layer order does not change. Only the hidden backpass adder orientation
+        changes. The code reverses the buses before addition when neuron 0 should act as the LSB
+        side, then reverses the result back into normal neuron order. This keeps the physical
+        neuron order stable while flipping carry pressure layer by layer.
+    </p>
+
+    <h2>9. Additive Residual Connections and Width Crossing</h2>
+
+    <p>
+        Earlier experiments used OR-style residuals. OR was simple, but it could saturate
+        features. If either side had a 1, the result stayed 1, which made it easy for active bits
+        to dominate and hard for the network to reshape information.
+    </p>
+
+    <p>The newer versions use actual binary addition for residuals:</p>
+
+    <pre>
+residual_output = low_bits(layer_output + residual_bus)
+    </pre>
+
+    <p>
+        This moved the design closer to how normal residual connections behave at the arithmetic
+        level. In standard neural networks, residuals are arithmetic additions such as F(x) + x.
+        In this hardware BNN, the residual is a fixed-width binary addition. It preserves a path
+        for earlier information, but also lets carry interaction mix the residual signal with the
+        layer output.
+    </p>
+
+    <p>
+        The centered residual test showed that additive residuals can also cross width changes.
+        The original 8-bit input is centered inside a 16-bit bus:
+    </p>
+
+    <pre>
+input8 = abcdefgh
+projected16 = 0000abcdefgh0000
+    </pre>
+
+    <p>
+        Then the projected bus is added into the 16-bit middle layer output. This avoided a
+        one-sided alignment bias and gave the smaller bus a balanced position inside the wider
+        hidden representation.
+    </p>
+
+    <h2>10. Training Rule</h2>
+
+    <p>
+        The local update rule is simple. Each neuron compares its current output bit against the
+        target bit assigned to that neuron. If the target is 1 and the output is 0, the neuron
+        increments or decrements its counters toward the current input pattern. If the target is
+        0 and the output is 1, the neuron moves its counters away from the current input pattern.
+        If the output already matches the target, the neuron holds.
+    </p>
+
+    <p>In compact form:</p>
+
+    <pre>
+INC = target AND NOT output
+DEC = output AND NOT target
+
+if INC:
+    move counters toward input bits
+
+if DEC:
+    move counters away from input bits
+    </pre>
+
+    <p>
+        The output layer can update on every wrong sample. Hidden layers update more slowly. In
+        the current baseline, hidden updates happen every fourth wrong answer, and only one
+        selected hidden layer updates during a hidden update event. This avoids changing every
+        hidden layer on every mistake, which had caused instability in earlier versions.
+    </p>
+
+    <h2>11. Results From the Current Baseline</h2>
+
+    <p>
+        The current grouped 2/3/4-bit mixed-node baseline repeatedly reached final error 0 on the
+        6-pattern identity dataset. The observed zero-error epochs included approximately 97,
+        8834, 13126, 27238, 41237, and 55468 across different runs. The fastest observed run
+        reached best error 0 by epoch 97.
+    </p>
+
+    <p>
+        The important point is not only that the network touched a low error once. Earlier
+        branches sometimes found a good state and later drifted away. The current baseline
+        repeatedly printed final tests where all six input patterns matched their expected
+        outputs. That makes it a stronger base than the earlier one-block and two-block
+        experiments.
+    </p>
+
+    <p>
+        The results suggest that the wider block, additive residual, alternating hidden backpass
+        direction, and grouped heterogeneous plasticity work together. The mixed counters appear
+        to be the main stabilizing breakthrough because the wider network struggled before
+        different learning speeds were assigned by whole node.
+    </p>
+
+    <table>
+        <tr>
+            <th>Observed run</th>
+            <th>Best zero epoch</th>
+            <th>Final error</th>
+        </tr>
+        <tr>
+            <td>Fast run</td>
+            <td>97</td>
+            <td>0</td>
+        </tr>
+        <tr>
+            <td>Additional run</td>
+            <td>8834</td>
+            <td>0</td>
+        </tr>
+        <tr>
+            <td>Additional run</td>
+            <td>13126</td>
+            <td>0</td>
+        </tr>
+        <tr>
+            <td>Additional run</td>
+            <td>27238</td>
+            <td>0</td>
+        </tr>
+        <tr>
+            <td>Additional run</td>
+            <td>41237</td>
+            <td>0</td>
+        </tr>
+        <tr>
+            <td>Additional run</td>
+            <td>55468</td>
+            <td>0</td>
+        </tr>
+    </table>
+
+    <h2>12. Comparison to Earlier Paper Version</h2>
+
+    <p>
+        The older write-up focused mainly on adder-based backpass propagation. That was still an
+        important discovery, and most of that interpretation remains useful. The main update is
+        that the current best architecture is no longer only an adder-backpass experiment. It is
+        now a full mixed-node hardware-friendly BNN baseline.
+    </p>
+
+    <p>
+        The older paper also treated OR residuals as a useful stable residual option. Later tests
+        showed that actual additive residuals worked better for this line of experiments.
+        Addition gave the residual path carry interaction and allowed width-crossing residuals
+        through centered projection.
+    </p>
+
+    <p>
+        The older paper used mostly 2-bit counters as weight memory. The new baseline uses
+        heterogeneous counter depths. That change is significant enough to become part of the
+        title and core claim. The improved architecture is not just adder-based. It is
+        multiplication-free, adder-backpass based, and uses grouped heterogeneous synaptic
+        plasticity.
+    </p>
+
+    <h2>13. Relationship to AdderNet and CAddNet</h2>
+
+    <p>
+        AdderNet is a real research direction that replaces multiplication-heavy convolution with
+        an L1-distance style response. Instead of computing a dot product between features and
+        filters, AdderNet uses a distance-like measure based on absolute differences. CAddNet
+        later explored a conjugate adder structure intended to reduce gate complexity and
+        stabilize training compared with AdderNet.
+    </p>
+
+    <p>
+        This BNN should not be described as an AdderNet clone. It is different in both data type
+        and training method. However, the family resemblance is real. AdderNet asks whether
+        multiplication is necessary for feature similarity in CNNs. This project asks a similar
+        question in a binary hardware setting: can binary similarity, adders, and counters
+        produce useful learning without multiplication?
+    </p>
+
+    <p>
+        The forward pass uses Hamming similarity rather than L1 distance over floating-point
+        features. The hidden training system is also custom: XOR output error, adder-shaped
+        hidden target buses, alternating carry direction, and mixed-depth counter plasticity.
+        Those parts are not standard AdderNet. They are the custom lane of this project.
+    </p>
+
+    <h2>14. Why the Design Is Hardware Friendly</h2>
+
+    <p>
+        The strongest hardware point is that the tested design removes multiplication from both
+        the forward path and the update path. The core operations are all friendly to digital
+        logic:
+    </p>
+
+    <ul>
+        <li>XNOR and XOR gates</li>
+        <li>popcount trees built from adders</li>
+        <li>fixed-width binary adders</li>
+        <li>threshold comparisons</li>
+        <li>small saturating counters</li>
+        <li>local increment and decrement updates</li>
+    </ul>
+
+    <p>
+        For a hardware portfolio, the most important proof would be an HDL version showing that
+        no DSP multipliers are inferred in synthesis. A strong next implementation path would be
+        Python reference model, then SystemVerilog modules, then Verilator testbenches, then
+        FPGA synthesis reports showing LUT/FF usage and zero DSP usage.
+    </p>
+
+    <p>
+        The design is also modular. A single neuron can be built first, then a mixed-node layer,
+        then a full 8 -> 16 -> 16 -> 16 -> 8 block, then stacked blocks. That makes the project
+        suitable for staged hardware implementation.
+    </p>
+
+    <h2>15. Limitations</h2>
+
+    <p>
+        This project is still experimental. The main dataset so far is a small 6-pattern identity
+        dataset. Repeated convergence on that task is meaningful for architecture testing, but it
+        does not prove broad general learning.
+    </p>
+
+    <p>
+        The current network still needs more controlled testing. Future logs should include fixed
+        seeds, number of runs, success rate, best epoch, final error, and comparison against
+        simpler baselines. The strongest claims should be limited to what has been tested: this
+        architecture repeatedly learned the identity dataset under the current conditions.
+    </p>
+
+    <p>
+        The design may also behave differently on tasks requiring memory, spatial reasoning, or
+        long sequences. Those are future tests, not solved problems. The next goal is to see
+        whether the same mixed-node block scales into stacked blocks and whether it can handle
+        simple reactive tasks with low-output action decisions.
+    </p>
+
+    <h2>16. Next Tests</h2>
+
+    <p>The immediate next test is stacked mixed-node blocks. The clean version is:</p>
+
+    <pre>
+Block 0: 8 -> 16 -> 16 -> 16 -> 8
+Block 1: 8 -> 16 -> 16 -> 16 -> 8
+
+Phase 1: train Block 0
+Phase 2: freeze Block 0 completely
+Phase 3: train Block 1 on the frozen Block 0 output
+Phase 4: optionally fine tune later, but only after the frozen-block test establishes a baseline
+    </pre>
+
+    <p>
+        This will test whether the new mixed-node block can be used as a reusable module. The
+        main question is whether the 8-bit bottleneck between blocks becomes a useful compressed
+        representation or an information choke point.
+    </p>
+
+    <p>
+        A second planned test is a simple movement game. Instead of forcing the network to
+        reproduce an entire 8-bit pattern, the network could learn a small action output such as
+        move left, move right, stay, or move toward a target. Low-output control tasks may let the
+        network learn more behaviors than full multi-bit identity mapping.
+    </p>
+
+    <h2>17. Conclusion</h2>
+
+    <p>
+        The project has moved from an adder-backpass experiment into a clearer hardware-native
+        BNN architecture. The current baseline combines five important ideas: XNOR-popcount
+        binary similarity, additive residuals, adder-shaped hidden backpass, alternating carry
+        direction, and grouped heterogeneous synaptic plasticity.
+    </p>
+
+    <p>
+        The biggest breakthrough was the mixed-depth counter rule. Assigning 2-bit, 3-bit, and
+        4-bit counter depths by whole node gave the network fast, medium, and slow learning
+        behavior while keeping all effective weights binary. That change helped the wider
+        8 -> 16 -> 16 -> 16 -> 8 network repeatedly converge where earlier versions were less
+        stable.
+    </p>
+
+    <p>
+        The core idea can be summarized simply: this is a multiplication-free BNN that uses
+        binary similarity for the forward path, binary adders for residual and hidden backpass
+        transforms, and heterogeneous counter-based plasticity for stable learning. It does not
+        replace gradient descent in general, but it does show that simple hardware-native
+        operations can produce repeatable learning behavior in a custom binary network.
+    </p>
+
+    <h2>Appendix A. Current Baseline Pseudocode</h2>
+
+    <pre>
+forward pass:
+    for each layer:
+        for each neuron:
+            effective_weight_bits = threshold(counter_values)
+            match_bits = XNOR(input_bits, effective_weight_bits)
+            matches = popcount(match_bits)
+            output_bit = threshold(matches)
+
+        if this is residual layer:
+            projected_input = center(original_input, layer_width)
+            layer_output = low_bits(layer_output + projected_input)
+
+output error:
+    target_bus = expected_output
+    output_error = expected_output XOR actual_output
+
+hidden backpass:
+    carry = 0
+
+    for each hidden layer moving backward:
+        if layer orientation says neuron 0 is LSB:
+            reverse buses before add
+
+        next_error, carry = ADD(target_bus, layer_output, carry)
+
+        reverse result back if needed
+        target_bus = next_error
+
+local update:
+    INC = target AND NOT output
+    DEC = output AND NOT target
+
+    if INC:
+        move counters toward input bits
+
+    if DEC:
+        move counters away from input bits
+    </pre>
+
+    <h2>Appendix B. Suggested Experiment Log Fields</h2>
+
+    <p>For future runs, each log should record:</p>
+
+    <ul>
+        <li>architecture shape</li>
+        <li>counter ratio and placement rule</li>
+        <li>residual type and location</li>
+        <li>backpass transform and carry orientation</li>
+        <li>hidden update period</li>
+        <li>random seed</li>
+        <li>best error</li>
+        <li>best epoch</li>
+        <li>final error</li>
+        <li>number of patterns correct</li>
+        <li>convergence rate across repeated runs</li>
+        <li>comparison to all-2-bit, all-3-bit, and no-residual baselines</li>
+    </ul>
+
+    <h2>References</h2>
+
+    <p>
+        [1] Hanting Chen, Yunhe Wang, Chunjing Xu, Boxin Shi, Chao Xu, Qi Tian, Chang Xu.
+        AdderNet: Do We Really Need Multiplications in Deep Learning? arXiv:1912.13200, 2019.
+    </p>
+
+    <p>
+        [2] Lulan Shen, Maryam Ziaeefard, Brett Meyer, Warren Gross, James J. Clark. Conjugate
+        Adder Net, CAddNet, A Space-Efficient Approximate CNN. CVPR Workshops, 2022.
+    </p>
+
+    <p>
+        [3] Project source code: BNNbasemodel.txt, current mixed-node baseline uploaded for this
+        portfolio update.
+    </p>
+
+    <p>
+        [4] Previous paper: Adder-Based Backpass Propagation in a Hardware-Oriented Binary
+        Neural Network, used as the prior version for this rewrite.
+    </p>
+
+</body>
+</html>
