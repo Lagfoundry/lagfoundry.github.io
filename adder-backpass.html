@@ -138,20 +138,21 @@
     <p>
         Most neural network systems are normally built around multiply-accumulate operations,
         floating-point gradients, and optimizer state. Those tools are powerful, but they do not
-        map cleanly onto a small hardware learning system made from gates, adders, counters,
-        registers, and threshold logic.
+        map cleanly onto the kind of learning system I wanted to build: something that could be
+        reasoned about at the gate level and eventually wired from simple hardware blocks.
     </p>
 
     <p>
-        This project started from a different direction. The goal was to see whether a useful
-        binary neural network could learn with hardware-friendly operations only: XNOR, XOR,
+        This project started from a hands-on circuit question. Could a small binary neural
+        network learn using operations that are simple enough to build from scratch? Instead of
+        relying on multiplication and floating-point math, the design focuses on XNOR, XOR,
         popcount, binary addition, threshold checks, and counter increments or decrements.
     </p>
 
     <p>
         The target was not a software-style neural network pretending to be hardware. The target
-        was a design that could eventually be translated into gate-level logic, HDL, or
-        FPGA-style hardware without relying on floating-point multiplication.
+        was a design where the learning loop itself could eventually be translated into
+        gate-level logic, HDL, FPGA hardware, breadboard experiments, or digital logic simulators.
     </p>
 
     <p>
